@@ -1,3 +1,6 @@
+<?php 
+error_reporting(0);
+?>
 <html>
  <head>
   <title>Tim's Webpage</title>  
@@ -26,94 +29,29 @@ input {
     font-size: 12pt;
     font-family: Calibri;
 }
+.ul.pagination {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+
+ul.pagination li {display: inline;}
+
+ul.pagination li a {
+    color: black;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: background-color .3s;
+}
+
+ul.pagination li a.active {
+    background-color: #4CAF50;
+    color: white;
+}
+
+ul.pagination li a:hover:not(.active) {background-color: #ddd;}
 </style>
-<script type='text/javascript' src='JS/sorttable.js'></script>
-<script type='text/javascript' src='https://code.jquery.com/jquery-1.11.0.min.js'></script>
-        <!-- If you want to use jquery 2+: https://code.jquery.com/jquery-2.1.0.min.js -->
-        <script type='text/javascript'>
-        $(document).ready(function () {
-
-            console.log("HELLO")
-            function exportTableToCSV($table, filename) {
-            	console.log($table)
-            	console.log(filename)
-
-
-                var $headers = $table.find('tr:has(th)')
-                    ,$rows = $table.find('tr:has(td)')
-
-                    // Temporary delimiter characters unlikely to be typed by keyboard
-                    // This is to avoid accidentally splitting the actual contents
-                    ,tmpColDelim = String.fromCharCode(11) // vertical tab character
-                    ,tmpRowDelim = String.fromCharCode(0) // null character
-
-                    // actual delimiter characters for CSV format
-                    ,colDelim = '","'
-                    ,rowDelim = '"\r\n"';
-
-                    // Grab text from table into CSV formatted string
-                    var csv = '"';
-                    csv += formatRows($headers.map(grabRow));
-                    csv += rowDelim;
-                    csv += formatRows($rows.map(grabRow)) + '"';
-
-                    // Data URI
-                    var csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csv);
-                    console.log(csvData)
-
-                $(this)
-                    .attr({
-                    'download': filename
-                        ,'href': csvData
-                        ,'target' : '_blank' //if you want it to open in a new window
-                });
-
-                //------------------------------------------------------------
-                // Helper Functions 
-                //------------------------------------------------------------
-                // Format the output so it has the appropriate delimiters
-                function formatRows(rows){
-                    return rows.get().join(tmpRowDelim)
-                        .split(tmpRowDelim).join(rowDelim)
-                        .split(tmpColDelim).join(colDelim);
-                }
-                // Grab and format a row from the table
-                function grabRow(i,row){
-                     
-                    var $row = $(row);
-                    //for some reason $cols = $row.find('td') || $row.find('th') won't work...
-                    var $cols = $row.find('td'); 
-                    if(!$cols.length) $cols = $row.find('th');  
-
-                    return $cols.map(grabCol)
-                                .get().join(tmpColDelim);
-                }
-                // Grab and format a column from the table 
-                function grabCol(j,col){
-                    var $col = $(col),
-                        $text = $col.text();
-
-                    return $text.replace('"', '""'); // escape double quotes
-
-                }
-            }
-
-
-            // This must be a hyperlink
-            $("#export").click(function (event) {
-                // var outputFile = 'export'
-
-                var outputFile = window.prompt("What do you want to name your output file (Note: This won't have any effect on Safari)") || 'export';
-                outputFile = outputFile.replace('.csv','') + '.csv'
-                 
-                // CSV
-                exportTableToCSV.apply(this, [$('#dvData>table'), outputFile]);
-                
-                // IF CSV, don't do event.preventDefault() or return false
-                // We actually need this to be a typical hyperlink
-            });
-        });
-    </script>
  </head>
  <body>
  <?php
@@ -172,7 +110,7 @@ input {
 		#$today = mysql_real_escape_string($today);
 		#$result = mysql_query("SELECT * FROM stockdata.sbl_info WHERE current_date >='{$today}'") or die(mysql_error());
 		#$result = mysql_query("SELECT * FROM stockdata.SBL_info") or die(mysql_error());
-	$sql = "SELECT distinct(ticker) as tick, sbl_qty FROM stockdata.SBL_info WHERE current_date >= curdate() group by tick"; #.$today;
+	$sql = "SELECT distinct(ticker) as tick FROM stockdata.SBL_info WHERE current_date >= curdate() group by tick"; #.$today;
 	$result = $conn->query($sql);
 
 	if ($result->num_rows > 0) {
@@ -313,12 +251,12 @@ input {
 				$year_qty = 0;			
 			}
 
-			$dayquota = ($sbl_sod-$avail_qty)*100/$sbl_sod;
-			$weekquota = ($week_sbl-$week_qty)*100/$week_sbl;
-			$monthquota = ($month_sbl-$month_qty)*100/$month_sbl;
-			$quartquota = ($quart_sbl-$quart_qty)*100/$quart_sbl;
-			$halfquota = ($half_sbl-$half_qty)*100/$half_sbl;
-			$yearquota = ($year_sbl-$year_qty)*100/$year_sbl;
+			$dayquota = max(0,($sbl_sod-$avail_qty)*100/$sbl_sod);
+			$weekquota = max(0,($week_sbl-$week_qty)*100/$week_sbl);
+			$monthquota = max(0,($month_sbl-$month_qty)*100/$month_sbl);
+			$quartquota = max(0,($quart_sbl-$quart_qty)*100/$quart_sbl);
+			$halfquota = max(0,($half_sbl-$half_qty)*100/$half_sbl);
+			$yearquota = max(0,($year_sbl-$year_qty)*100/$year_sbl);
 
 	    	echo '<tr>
 				<td> '. $ticker. '</td>
@@ -339,6 +277,109 @@ $conn->close();
 	?>
 </table>
 </div>
+<ul class="pagination">
+  <li><a href="#">&laquo;</a></li>
+  <li><a href="#">1</a></li>
+  <li><a class="active" href="#">2</a></li>
+  <li><a href="#">3</a></li>
+  <li><a href="#">4</a></li>
+  <li><a href="#">5</a></li>
+  <li><a href="#">6</a></li>
+  <li><a href="#">&raquo;</a></li>
+</ul>
 
  </body>
+ <script type='text/javascript' src='JS/sorttable.js'></script>
+<script type='text/javascript' src='https://code.jquery.com/jquery-1.11.0.min.js'></script>
+        <!-- If you want to use jquery 2+: https://code.jquery.com/jquery-2.1.0.min.js -->
+        <script type='text/javascript'>
+        $(document).ready(function () {
+
+            console.log("HELLO")
+            function exportTableToCSV($table, filename) {
+            	console.log($table)
+            	console.log(filename)
+
+
+                var $headers = $table.find('tr:has(th)')
+                    ,$rows = $table.find('tr:has(td)')
+
+                    // Temporary delimiter characters unlikely to be typed by keyboard
+                    // This is to avoid accidentally splitting the actual contents
+                    ,tmpColDelim = String.fromCharCode(11) // vertical tab character
+                    ,tmpRowDelim = String.fromCharCode(0) // null character
+
+                    // actual delimiter characters for CSV format
+                    ,colDelim = '","'
+                    ,rowDelim = '"\r\n"';
+
+                    // Grab text from table into CSV formatted string
+                    var csv = '"';
+                    csv += formatRows($headers.map(grabRow));
+                    csv += rowDelim;
+                    csv += formatRows($rows.map(grabRow)) + '"';
+
+                    // Data URI
+                    var csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csv);
+                    console.log(csvData)
+
+                $(this)
+                    .attr({
+                    'download': filename
+                        ,'href': csvData
+                        ,'target' : '_blank' //if you want it to open in a new window
+                });
+
+                //------------------------------------------------------------
+                // Helper Functions 
+                //------------------------------------------------------------
+                // Format the output so it has the appropriate delimiters
+                function formatRows(rows){
+                    return rows.get().join(tmpRowDelim)
+                        .split(tmpRowDelim).join(rowDelim)
+                        .split(tmpColDelim).join(colDelim);
+                }
+                // Grab and format a row from the table
+                function grabRow(i,row){
+                     
+                    var $row = $(row);
+                    //for some reason $cols = $row.find('td') || $row.find('th') won't work...
+                    var $cols = $row.find('td'); 
+                    if(!$cols.length) $cols = $row.find('th');  
+
+                    return $cols.map(grabCol)
+                                .get().join(tmpColDelim);
+                }
+                // Grab and format a column from the table 
+                function grabCol(j,col){
+                    var $col = $(col),
+                        $text = $col.text();
+
+                    return $text.replace('"', '""'); // escape double quotes
+
+                }
+            }
+
+
+            // This must be a hyperlink
+            $("#export").click(function (event) {
+                // var outputFile = 'export'
+
+                var outputFile = window.prompt("What do you want to name your output file (Note: This won't have any effect on Safari)") || 'export';
+                outputFile = outputFile.replace('.csv','') + '.csv'
+                 
+                // CSV
+                exportTableToCSV.apply(this, [$('#dvData>table'), outputFile]);
+                
+                // IF CSV, don't do event.preventDefault() or return false
+                // We actually need this to be a typical hyperlink
+            });
+        });
+    </script>
+    <script>
+    $(window).bind("load", function() {
+	alert("The page has now loaded.");
+});
+    </script>
+
 </html>
